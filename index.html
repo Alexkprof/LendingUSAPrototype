@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LendingUSA Prototype</title>
+    <style>
+      :root {
+        --bg: #eef3f7;
+        --panel: #ffffff;
+        --text: #233247;
+        --muted: #667991;
+        --line: #d9e3ee;
+        --brand-blue: #2f80ed;
+        --brand-blue-dark: #1f68c8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
+
+      .page-wrap {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .top-bar {
+        height: 72px;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+      }
+
+      .brand {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f2b38;
+      }
+
+      .brand span {
+        color: #2a85e8;
+      }
+
+      .top-help {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .content {
+        flex: 1;
+        width: 100%;
+        max-width: 1380px;
+        margin: 0 auto;
+        padding: 16px 20px;
+      }
+
+      .screen {
+        display: none;
+      }
+
+      .screen.active {
+        display: block;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        box-shadow: 0 4px 16px rgba(31, 50, 71, 0.06);
+      }
+
+      .screen-login.active {
+        min-height: calc(100vh - 72px - 43px);
+        display: flex;
+        align-items: center;
+      }
+
+      .login-layout {
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(320px, 390px) 1fr;
+        gap: 28px;
+        align-items: stretch;
+      }
+
+      .login-card {
+        padding: 26px;
+      }
+
+      .login-card h1 {
+        margin: 0 0 20px;
+        font-size: 20px;
+      }
+
+      .field {
+        margin-bottom: 14px;
+      }
+
+      .field label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .field input {
+        width: 100%;
+        border: 1px solid #c6d2df;
+        border-radius: 6px;
+        padding: 10px 11px;
+        font-size: 14px;
+      }
+
+      .btn {
+        border: none;
+        border-radius: 6px;
+        background: var(--brand-blue);
+        color: #fff;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 11px 14px;
+        width: 100%;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .btn:hover {
+        background: var(--brand-blue-dark);
+      }
+
+      .forgot {
+        margin-top: 14px;
+        text-align: center;
+        color: #7b8da2;
+        font-size: 13px;
+      }
+
+      .marketing-card {
+        position: relative;
+        min-height: 420px;
+        padding: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        overflow: hidden;
+        background-image:
+          linear-gradient(180deg, rgba(17, 33, 52, 0.15) 8%, rgba(17, 33, 52, 0.55) 100%),
+          url("./images/login-hero.png");
+        background-size: cover;
+        background-position: center;
+      }
+
+      .marketing-overlay {
+        width: min(90%, 560px);
+        background: rgba(255, 255, 255, 0.96);
+        border-radius: 10px;
+        padding: 18px 18px 14px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+      }
+
+      .marketing-title {
+        font-size: 28px;
+        line-height: 1.2;
+        margin: 0 0 12px;
+        max-width: 740px;
+        color: #223046;
+      }
+
+      .marketing-copy {
+        margin: 0 0 14px;
+        color: #4f6178;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .marketing-note {
+        margin-top: 10px;
+        color: #6d7f95;
+        font-size: 12px;
+      }
+
+      .marketing-overlay .btn {
+        width: auto;
+        min-width: 240px;
+        padding: 10px 14px;
+        font-size: 13px;
+      }
+
+      .dashboard-wrap {
+        display: grid;
+        gap: 10px;
+      }
+
+      .dashboard-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .dashboard-title h2 {
+        margin: 0;
+        font-size: 40px;
+        line-height: 1;
+        letter-spacing: -0.3px;
+      }
+
+      .dashboard-title p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .hours {
+        text-align: right;
+        color: #51657e;
+        font-size: 11px;
+        line-height: 1.45;
+      }
+
+      .dashboard-layout {
+        display: grid;
+        grid-template-columns: 1.03fr 1fr 1fr;
+        gap: 14px;
+        align-items: start;
+        width: 100%;
+      }
+
+      .panel {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        box-shadow: none;
+      }
+
+      .panel-title {
+        margin: 0;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        font-size: 17px;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .start-card {
+        background: linear-gradient(180deg, #3f95eb 0%, #2f80ed 100%);
+        color: #fff;
+        padding: 16px 16px 12px;
+      }
+
+      .start-top {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .start-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.95);
+        color: #2f80ed;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+      }
+
+      .start-copy h3 {
+        margin: 0;
+        font-size: 20px;
+        line-height: 1.1;
+      }
+
+      .start-copy p {
+        margin: 4px 0 0;
+        font-size: 31px;
+        line-height: 1.05;
+        font-weight: 600;
+      }
+
+      .start-btn {
+        margin-top: 14px;
+        width: 100%;
+        border: 0;
+        border-radius: 6px;
+        background: rgba(31, 55, 87, 0.28);
+        color: #fff;
+        font-weight: 700;
+        padding: 11px;
+        font-size: 13px;
+      }
+
+      .check-panel {
+        margin-top: 12px;
+        padding-bottom: 14px;
+      }
+
+      .check-body {
+        padding: 12px 14px 0;
+      }
+
+      .search-wrap {
+        display: flex;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        overflow: hidden;
+      }
+
+      .search-wrap input {
+        flex: 1;
+        border: 0;
+        padding: 11px;
+        font-size: 13px;
+      }
+
+      .search-wrap button {
+        width: 38px;
+        border: 0;
+        background: #2f80ed;
+        color: #fff;
+      }
+
+      .merchant-panel {
+        margin-top: 12px;
+      }
+
+      .merchant-tools {
+        padding: 0;
+      }
+
+      .tool-option {
+        display: flex;
+        gap: 10px;
+        border-top: 1px solid var(--line);
+        padding: 12px 14px;
+        background: #fff;
+      }
+
+      .tool-option:first-child {
+        border-top: 0;
+      }
+
+      .tool-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #7f90a4;
+        flex-shrink: 0;
+      }
+
+      .tool-text h4 {
+        margin: 0 0 3px;
+        font-size: 14px;
+      }
+
+      .tool-text p {
+        margin: 0;
+        color: #5a6c82;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .tool-option.featured {
+        background: #eaf4ff;
+        border-top: 0;
+      }
+
+      .tool-option.featured .tool-text p {
+        line-height: 1.45;
+      }
+
+      .tool-option.featured .btn {
+        margin-top: 8px;
+        width: auto;
+        min-width: 210px;
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+
+      .action-body {
+        padding: 16px 14px;
+      }
+
+      .action-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        text-align: center;
+      }
+
+      .action-item {
+        padding: 6px 4px;
+      }
+
+      .action-circle {
+        width: 86px;
+        height: 86px;
+        border-radius: 50%;
+        border: 2px solid #e7eef6;
+        margin: 0 auto 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #7ca0c9;
+        font-size: 32px;
+        position: relative;
+      }
+
+      .badge {
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ef4b4c;
+        color: #fff;
+        font-size: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .action-item h4 {
+        margin: 0 0 2px;
+        font-size: 18px;
+        color: #7ca0c9;
+      }
+
+      .action-item p {
+        margin: 0;
+        font-size: 14px;
+        color: #3c4e66;
+        font-weight: 600;
+      }
+
+      .resource-panel {
+        margin-top: 12px;
+      }
+
+      .resource-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 12px 14px;
+      }
+
+      .resource-item {
+        background: #f1f6fb;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      .resource-item img {
+        width: 100%;
+        height: 70px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .resource-item p {
+        margin: 6px 0 0;
+        padding: 0 2px 2px;
+        color: #5f728a;
+        font-size: 11px;
+        line-height: 1.25;
+        text-align: center;
+      }
+
+      .resource-subtitle {
+        text-align: center;
+        color: #6b7d93;
+        font-size: 11px;
+        font-weight: 700;
+        padding-top: 10px;
+      }
+
+      .resource-list .tool-option {
+        align-items: flex-start;
+      }
+
+      .approval-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .approval-tab {
+        flex: 1;
+        border: 0;
+        border-right: 1px solid var(--line);
+        background: #fff;
+        padding: 11px 6px;
+        font-size: 12px;
+        color: #667991;
+        font-weight: 600;
+      }
+
+      .approval-tab:last-child {
+        border-right: 0;
+      }
+
+      .approval-tab.active {
+        background: #2f80ed;
+        color: #fff;
+      }
+
+      .approval-body {
+        height: 238px;
+        position: relative;
+      }
+
+      .approval-line {
+        position: absolute;
+        left: 12%;
+        right: 12%;
+        top: 65%;
+        border-top: 2px solid #d6e0ec;
+      }
+
+      .approval-footer {
+        border-top: 1px solid var(--line);
+        padding: 10px 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+
+      .approval-footer span {
+        color: #8192a7;
+        font-size: 10px;
+        line-height: 1.3;
+      }
+
+      .approval-footer strong {
+        color: #3188ec;
+        font-size: 38px;
+        line-height: 1;
+      }
+
+      .dashboard-mode .top-bar {
+        display: none;
+      }
+
+      .dashboard-mode .content {
+        max-width: none;
+        width: 100vw;
+        margin: 0;
+        padding: 10px 14px 16px;
+      }
+
+      .dashboard-mode .footer {
+        display: none;
+      }
+
+      .footer {
+        border-top: 1px solid var(--line);
+        text-align: center;
+        color: #8a97a8;
+        font-size: 12px;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.6);
+      }
+
+      @media (max-width: 1180px) {
+        .dashboard-mode .content {
+          width: 100%;
+          padding: 10px 12px 14px;
+        }
+
+        .dashboard-layout {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .dashboard-title h2 {
+          font-size: 34px;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .login-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .marketing-title {
+          font-size: 24px;
+        }
+
+        .screen-login.active {
+          align-items: flex-start;
+          padding-top: 8px;
+        }
+
+        .dashboard-layout {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        .dashboard-title-row {
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .hours {
+          text-align: left;
+        }
+
+        .dashboard-title h2 {
+          font-size: 28px;
+        }
+
+        .panel-title {
+          font-size: 15px;
+          padding: 10px 12px;
+        }
+
+        .action-circle {
+          width: 72px;
+          height: 72px;
+          font-size: 26px;
+        }
+
+        .approval-body {
+          height: 190px;
+        }
+
+        .approval-footer strong {
+          font-size: 30px;
+        }
+
+        .resource-row {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .content {
+          padding: 12px 10px;
+        }
+
+        .dashboard-mode .content {
+          padding: 8px 8px 12px;
+        }
+
+        .start-copy h3 {
+          font-size: 18px;
+        }
+
+        .start-copy p {
+          font-size: 24px;
+        }
+
+        .marketing-card {
+          min-height: 320px;
+          padding: 14px;
+        }
+
+        .marketing-overlay {
+          width: 100%;
+          padding: 14px 14px 12px;
+        }
+
+        .marketing-overlay .btn {
+          width: 100%;
+          min-width: 100%;
+        }
+
+        .tool-option.featured .btn {
+          min-width: 100%;
+          width: 100%;
+        }
+
+        .approval-tab {
+          font-size: 10px;
+          padding: 9px 4px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrap">
+      <header class="top-bar">
+        <div class="brand">lending<span>USA</span> <small>Portal</small></div>
+        <div id="topHelp" class="top-help">Questions? <strong>(800) 667-8743</strong></div>
+      </header>
+
+      <main class="content">
+        <section id="loginScreen" class="screen screen-login active">
+          <div class="login-layout">
+            <section class="card login-card">
+              <h1>Portal Account Sign In</h1>
+              <form id="loginForm">
+                <div class="field">
+                  <label for="username">Username</label>
+                  <input id="username" name="username" type="text" value="jmsbusiness" />
+                </div>
+                <div class="field">
+                  <label for="password">Password</label>
+                  <input id="password" name="password" type="password" value="password123" />
+                </div>
+                <button class="btn" type="submit">SIGN IN</button>
+              </form>
+              <div class="forgot">Forgot password?</div>
+            </section>
+
+            <section class="card marketing-card">
+              <div class="marketing-overlay">
+                <h2 class="marketing-title">
+                  Get funding to grow your business - no lengthy applications
+                </h2>
+                <p class="marketing-copy">
+                  Eligible merchants can access fast working capital through LendingUSA Merchant
+                  Advance. Use funds for inventory, marketing, hiring, or equipment - and repay
+                  automatically from your future sales.
+                </p>
+                <button id="offerBtn" class="btn" type="button">Check your funding offers</button>
+                <p class="marketing-note">
+                  *Checking your eligibility won't impact your credit score.
+                </p>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="dashboardScreen" class="screen">
+          <div class="dashboard-wrap">
+            <div class="dashboard-title-row">
+              <div class="dashboard-title">
+                <h2>Welcome, Jim's Business!</h2>
+                <p>You have 0 pre-approved applications that need action.</p>
+              </div>
+              <div class="hours">
+                <strong>Hours of Operation</strong><br />
+                Monday - Friday 7:00 AM - 8:00 PM Pacific Time<br />
+                Saturday - Sunday 9:00 AM - 8:00 PM Pacific Time
+              </div>
+            </div>
+
+            <div class="dashboard-layout">
+              <div>
+                <section class="panel start-card">
+                  <div class="start-top">
+                    <div class="start-icon">:::</div>
+                    <div class="start-copy">
+                      <h3>Start here</h3>
+                      <p>to submit a new application</p>
+                    </div>
+                  </div>
+                  <button class="start-btn">START NEW APPLICATION</button>
+                </section>
+
+                <section class="panel check-panel">
+                  <h3 class="panel-title">Check App Status</h3>
+                  <div class="check-body">
+                    <div class="search-wrap">
+                      <input type="text" value="" placeholder="Applicant Name Or Application ID" />
+                      <button aria-label="Search">&gt;</button>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="panel merchant-panel">
+                  <h3 class="panel-title">Merchant Tools</h3>
+                  <div class="merchant-tools">
+                    <article class="tool-option featured">
+                      <div class="tool-icon">$</div>
+                      <div class="tool-text">
+                        <h4>Access capital for your business</h4>
+                        <p>
+                          Get fast access to working capital through LendingUSA Business Funding.
+                          Eligible merchants can unlock financing based on their sales performance
+                          with simple repayment through future revenue.
+                        </p>
+                        <a class="btn" href="#">Check your funding offer</a>
+                      </div>
+                    </article>
+
+                    <article class="tool-option">
+                      <div class="tool-icon">T</div>
+                      <div class="tool-text">
+                        <h4>Text to Apply</h4>
+                        <p>Text application link to your customer.</p>
+                      </div>
+                    </article>
+
+                    <article class="tool-option">
+                      <div class="tool-icon">R</div>
+                      <div class="tool-text">
+                        <h4>Review Applications</h4>
+                        <p>View current and past applications.</p>
+                      </div>
+                    </article>
+
+                    <article class="tool-option">
+                      <div class="tool-icon">F</div>
+                      <div class="tool-text">
+                        <h4>Refund Requests</h4>
+                        <p>View refund requests.</p>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+              </div>
+
+              <div>
+                <section class="panel">
+                  <h3 class="panel-title">Action Center</h3>
+                  <div class="action-body">
+                    <div class="action-grid">
+                      <div class="action-item">
+                        <div class="action-circle">
+                          ✎
+                          <span class="badge">0</span>
+                        </div>
+                        <h4>&nbsp;</h4>
+                        <p>Need Signature</p>
+                      </div>
+                      <div class="action-item">
+                        <div class="action-circle">
+                          ⚠
+                          <span class="badge">0</span>
+                        </div>
+                        <h4>&nbsp;</h4>
+                        <p>Due to Expire</p>
+                      </div>
+                      <div class="action-item">
+                        <div class="action-circle">i</div>
+                        <h4>0</h4>
+                        <p>Need Info</p>
+                      </div>
+                      <div class="action-item">
+                        <div class="action-circle">i</div>
+                        <h4>0</h4>
+                        <p>Incomplete</p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="panel resource-panel">
+                  <h3 class="panel-title">Merchant Resource Center</h3>
+                  <div class="resource-subtitle">TRAINING VIDEOS</div>
+                  <div class="resource-row">
+                    <div class="resource-item">
+                      <img
+                        src="./images/training-1.png"
+                        alt="Training video thumbnail 1"
+                      />
+                      <p>Present Financing</p>
+                    </div>
+                    <div class="resource-item">
+                      <img
+                        src="./images/training-2.png"
+                        alt="Training video thumbnail 2"
+                      />
+                      <p>Submit Applications</p>
+                    </div>
+                    <div class="resource-item">
+                      <img
+                        src="./images/training-3.png"
+                        alt="Training video thumbnail 3"
+                      />
+                      <p>Action Center</p>
+                    </div>
+                  </div>
+                  <div class="resource-list">
+                    <article class="tool-option">
+                      <div class="tool-icon">T</div>
+                      <div class="tool-text">
+                        <h4>Tools</h4>
+                        <p>Best practices, website banners and more.</p>
+                      </div>
+                    </article>
+                    <article class="tool-option">
+                      <div class="tool-icon">D</div>
+                      <div class="tool-text">
+                        <h4>Digital Brochures with QR Code</h4>
+                        <p>
+                          Personalized printable brochures with a unique QR code for offers.
+                        </p>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+              </div>
+
+              <div>
+                <section class="panel">
+                  <h3 class="panel-title">Approval Stats</h3>
+                  <div class="approval-tabs">
+                    <button class="approval-tab" type="button">LAST 7 DAYS</button>
+                    <button class="approval-tab" type="button">LAST 5 WEEKS</button>
+                    <button class="approval-tab active" type="button">LAST 12 MONTHS</button>
+                  </div>
+                  <div class="approval-body">
+                    <div class="approval-line"></div>
+                  </div>
+                  <div class="approval-footer">
+                    <span>TOTAL APPROVAL AMOUNT<br />LAST 12 MONTHS</span>
+                    <strong>$0.00</strong>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">Copyright &copy; 2026 LendingUSA, LLC. All Rights Reserved.</footer>
+    </div>
+
+    <script>
+      const loginScreen = document.getElementById("loginScreen");
+      const dashboardScreen = document.getElementById("dashboardScreen");
+      const topHelp = document.getElementById("topHelp");
+      const loginForm = document.getElementById("loginForm");
+      const offerBtn = document.getElementById("offerBtn");
+
+      function showDashboard() {
+        loginScreen.classList.remove("active");
+        dashboardScreen.classList.add("active");
+        topHelp.textContent = "Welcome, JM's Business";
+        document.body.classList.add("dashboard-mode");
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }
+
+      loginForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        showDashboard();
+      });
+
+      offerBtn.addEventListener("click", showDashboard);
+    </script>
+  </body>
+</html>
